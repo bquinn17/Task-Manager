@@ -1,10 +1,22 @@
-require "rubygems"
-require "active_record"
-require "active_support"
+require 'rubygems'
+require 'active_record'
+require 'active_support'
 
-module EarGTD
+module UF_task
   
   module_function
+
+  class Project < ActiveRecord::Base
+    has_many :tasks
+
+    def to_s; "<#{name}>"; end
+  end
+
+  class Context < ActiveRecord::Base
+    has_many :tasks
+
+    def to_s; "[#{name}]"; end
+  end
 
   def destroy
     Models::Task.destroy_all
@@ -46,7 +58,7 @@ module EarGTD
   def dump(file=nil)
     content = Models::Task.dump
     if file
-      File.open(file,"w") { |f| f.puts(content) }
+      File.open(file, 'w') { |f| f.puts(content) }
     end
     return content
   end
@@ -60,7 +72,7 @@ module EarGTD
   end
 
   def parse_task(string)
-    string.gsub(/[<\[].*[>\]]/,"").strip
+    string.gsub(/[<\[].*[>\]]/, '').strip
   end
 
   def parse_context(string)
@@ -71,38 +83,38 @@ module EarGTD
     args = Array(cmd)
     command = args.shift
     case(command)
-    when "setup_db"
-      EarGTD::Models.generate_schema
-    when "+"
+    when 'setup_db'
+      UF_task::Models.generate_schema
+    when '+'
       add_task(args[0])
-    when "@"
+    when '@'
       t = tasks 
-      puts t.empty? ? "Looks like you have nothing to do.\n" : t 
-    when "@p"
+      puts t.empty? ? "Looks like you have nothing to do.\n" : t
+    when '@p'
       r = tasks_for_project(args[0]) rescue "Got nothing for #{args[0]}"
       puts r 
-    when "@c"
+    when '@c'
       r = tasks_for_context(args[0]) rescue "Got nothing for #{args[0]}"
       puts r   
-    when "-"
+    when '-'
       remove_task(args[0].to_i)
-    when "dump"
+    when 'dump'
       c = dump(args[0])
       return if args[0]
       puts c
-    when "destroy"
+    when 'destroy'
       destroy
-    when "import"
+    when 'import'
       import(File.read(args[0]))
     else
-      puts "Que?"
+      puts 'Que?'
     end
     
   end  
   
-  def connect(dbfile="data/ear_gtd.db")
+  def connect(dbfile='data/ear_gtd.db')
     ActiveRecord::Base.establish_connection(
-      :adapter => "sqlite3", :database => dbfile
+        :adapter => 'sqlite3', :database => dbfile
     )
   end
 
@@ -124,18 +136,6 @@ module EarGTD
         ["#{description}",project,context].compact.join(" ")
       end
 
-    end
-
-    class Project < ActiveRecord::Base
-      has_many :tasks
-
-      def to_s; "<#{name}>"; end
-    end
-
-    class Context < ActiveRecord::Base
-      has_many :tasks
-      
-      def to_s; "[#{name}]"; end
     end
 
     module_function

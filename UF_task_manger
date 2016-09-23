@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+require 'bin/uf_task_manager'
+
+UF_task.connect
+UF_task.process_command(ARGV)

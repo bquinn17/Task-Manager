@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-require "lib/ear_gtd"        
-
-EarGTD.connect
-EarGTD.process_command(ARGV)
